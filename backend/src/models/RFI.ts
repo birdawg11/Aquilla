@@ -6,7 +6,7 @@ export interface IRFI extends Document {
   projectId: string;
   title: string;
   description: string;
-  status: 'open' | 'closed' | 'pending';
+  status: 'open' | 'closed' | 'pending' | 'Answered';
   priority: 'low' | 'medium' | 'high';
   assignedTo: string;
   createdBy: string;
@@ -14,6 +14,11 @@ export interface IRFI extends Document {
   updatedAt: Date;
   dueDate?: Date;
   attachments: string[];
+  responses: {
+    text: string;
+    createdBy: string;
+    createdAt: Date;
+  }[];
   comments: {
     text: string;
     createdBy: string;
@@ -29,7 +34,7 @@ const RFISchema = new Schema({
   description: { type: String, required: true },
   status: { 
     type: String, 
-    enum: ['open', 'closed', 'pending'],
+    enum: ['open', 'closed', 'pending', 'Answered'],
     default: 'open'
   },
   priority: { 
@@ -41,6 +46,11 @@ const RFISchema = new Schema({
   createdBy: { type: String, required: true },
   dueDate: { type: Date },
   attachments: [{ type: String }],
+  responses: [{
+    text: { type: String, required: true },
+    createdBy: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now }
+  }],
   comments: [{
     text: { type: String, required: true },
     createdBy: { type: String, required: true },

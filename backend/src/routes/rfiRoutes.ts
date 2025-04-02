@@ -2,19 +2,26 @@ import express from 'express';
 import {
   createRFI,
   getRFIs,
-  getRFIById,
+  getRFI,
   updateRFI,
-  addRFIResponse,
   deleteRFI
 } from '../controllers/rfiController';
 
 const router = express.Router();
 
-router.post('/', createRFI);
+// Get all RFIs for a project
 router.get('/project/:projectId', getRFIs);
-router.get('/:id', getRFIById);
+
+// Get a single RFI
+router.get('/:id', getRFI);
+
+// Create a new RFI
+router.post('/', createRFI);
+
+// Update an RFI
 router.put('/:id', updateRFI);
-router.post('/:id/responses', addRFIResponse);
+
+// Delete an RFI
 router.delete('/:id', deleteRFI);
 
 export default router; 
