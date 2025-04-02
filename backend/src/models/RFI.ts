@@ -1,63 +1,76 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface IRFI extends Document {
-  projectId: mongoose.Types.ObjectId;
   rfiNumber: string;
+  projectId: string;
   title: string;
   description: string;
-  status: 'Open' | 'In Review' | 'Answered' | 'Closed';
-  priority: 'Low' | 'Medium' | 'High' | 'Urgent';
-  submittedBy: string;
+  status: 'open' | 'closed' | 'pending';
+  priority: 'low' | 'medium' | 'high';
   assignedTo: string;
-  dueDate: Date;
-  attachments: string[];
-  responses: {
-    text: string;
-    submittedBy: string;
-    submittedAt: Date;
-    attachments: string[];
-  }[];
+  createdBy: string;
   createdAt: Date;
   updatedAt: Date;
+  dueDate?: Date;
+  attachments: string[];
+  comments: {
+    text: string;
+    createdBy: string;
+    createdAt: Date;
+  }[];
+  generateRFINumber(): Promise<string>;
 }
 
-const RFISchema: Schema = new Schema({
-  projectId: { type: Schema.Types.ObjectId, ref: 'Project', required: true },
+const RFISchema = new Schema({
   rfiNumber: { type: String, required: true, unique: true },
+  projectId: { type: String, required: true },
   title: { type: String, required: true },
   description: { type: String, required: true },
-  status: {
-    type: String,
-    enum: ['Open', 'In Review', 'Answered', 'Closed'],
-    default: 'Open'
+  status: { 
+    type: String, 
+    enum: ['open', 'closed', 'pending'],
+    default: 'open'
   },
-  priority: {
-    type: String,
-    enum: ['Low', 'Medium', 'High', 'Urgent'],
-    default: 'Medium'
+  priority: { 
+    type: String, 
+    enum: ['low', 'medium', 'high'],
+    default: 'medium'
   },
-  submittedBy: { type: String, required: true },
   assignedTo: { type: String, required: true },
-  dueDate: { type: Date, required: true },
+  createdBy: { type: String, required: true },
+  dueDate: { type: Date },
   attachments: [{ type: String }],
-  responses: [{
+  comments: [{
     text: { type: String, required: true },
-    submittedBy: { type: String, required: true },
-    submittedAt: { type: Date, default: Date.now },
-    attachments: [{ type: String }]
+    createdBy: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now }
   }]
 }, {
   timestamps: true
 });
 
-// Generate RFI number before saving
+// Static method to generate RFI number
+RFISchema.statics.generateRFINumber = async function(projectId: string): Promise<string> {
+  const timestamp = Date.now().toString().slice(-4);
+  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+  return `RFI-${projectId}-${timestamp}-${random}`;
+};
+
+// Pre-save middleware to generate RFI number
 RFISchema.pre('save', async function(next) {
-  if (!this.rfiNumber) {
-    const project = await mongoose.model('Project').findById(this.projectId);
-    const count = await this.constructor.countDocuments({ projectId: this.projectId });
-    this.rfiNumber = `${project.name}-RFI-${String(count + 1).padStart(3, '0')}`;
+  if (!this.isModified('rfiNumber')) {
+    try {
+      this.rfiNumber = await (this.constructor as any).generateRFINumber(this.projectId);
+      next();
+    } catch (error) {
+      next(error as Error);
+    }
+  } else {
+    next();
   }
-  next();
 });
 
-export default mongoose.model<IRFI>('RFI', RFISchema); 
+const RFI = mongoose.model<IRFI>('RFI', RFISchema);
+
+export default RFI; 
