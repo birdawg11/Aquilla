@@ -1,6 +1,6 @@
 [build]
   base = "/"
-  command = "cd frontend && npm install --legacy-peer-deps --no-package-lock && npm run build"
+  command = "cd frontend && yarn install && yarn build"
   publish = "frontend/build"
 
 [[redirects]]

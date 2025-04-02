@@ -1,7 +1,14 @@
 {
-  "name": "spryware-dashboard",
+  "name": "aquillasancta",
   "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "resolutions": {
+    "typescript": "4.9.5"
+  },
   "dependencies": {
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
