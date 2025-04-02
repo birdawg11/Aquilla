@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import dailyReportRoutes from './routes/dailyReportRoutes';
+import projectRoutes from './routes/projectRoutes';
+import rfiRoutes from './routes/rfiRoutes';
 
 // Load environment variables
 dotenv.config();
@@ -23,6 +25,8 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/aquillasa
 
 // Routes
 app.use('/api/daily-reports', dailyReportRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/rfis', rfiRoutes);
 
 // Test route (no auth required)
 app.get('/api/test', (req: Request, res: Response) => {
